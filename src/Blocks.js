@@ -10,8 +10,10 @@
 
     count: 0,
     width: 0,
+    height: 0,
     startY: 0,
     groundY: 0,
+    callback: undefined,
     isDead: true,
 
     createBlock: function () {
@@ -39,6 +41,7 @@
         duration: 3000,
         onComplete: function () {
           this.removeListener();
+          this.checkOverScene();
           this.createBlock();
         }.bind(this)
       });
@@ -71,6 +74,20 @@
       return this.count;
     },
 
+    checkOverScene: function () {
+      var top = this.children.reduce(function (pre, curr) {
+        if (pre.y < curr.y)
+          return pre;
+        else
+          return curr;
+      });
+      if (top.y - top.height <= 0) {
+        this.groundY = this.height;
+        this.removeAllChildren();
+        ns.moveBackground();
+      }
+    },
+
     checkCollision: function () {
       if (this.count > 1) {
         var cur = this.getChildById('block' + (this.count - 1));
@@ -78,6 +95,7 @@
           if (cur.hitTestObject(this.children[i], true) ) {
             this.tween.stop();
             this.removeListener();
+            this.checkOverScene();
             this.createBlock();
             return true;
           }

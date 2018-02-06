@@ -86,17 +86,32 @@
         }
       }), this.stage.canvas);
 
+      this.bg = new Hilo.Bitmap({
+        id: 'bg',
+        image: this.asset.bg,
+        rect: [0, 0, 720, 750]
+      }).addTo(this.stage);
+
       //地面
       this.ground = new Hilo.Bitmap({
         id: 'ground',
         image: this.asset.ground
-      }).addTo(this.stage);
+      }).addTo(this.stage, this.bg.depth + 1);
 
       //设置地面的y轴坐标
       this.ground.y = this.height - this.ground.height;
 
       //移动地面
       // Hilo.Tween.to(this.ground, {x:-60}, {duration:300, loop:true});
+    },
+
+    moveBackground: function () {
+      if (this.bg.y != 750)
+        Hilo.Tween.to(this.bg, {y: 750}, {duration:500});
+      else
+        Hilo.Tween.fromTo(this.bg, {y: this.height - 750}, {y: 750}, {duration:1000});
+
+      Hilo.Tween.to(this.ground, {y: this.height}, {duration:500});
     },
 
     initCurrentScore: function () {
@@ -117,7 +132,9 @@
         id: 'blocks',
         image: this.asset.blocks,
         width: this.width,
-        groundY: this.ground.y
+        height: this.height,
+        groundY: this.ground.y,
+        callback: this.moveBackground
       }).addTo(this.stage, this.ground.depth + 1);
     },
 
@@ -155,6 +172,7 @@
       //设置当前分数的位置
       this.currentScore.x = this.width - this.currentScore.width - 30;
       //碰撞检测
+      this.blocks.checkCollision();
       // if (!this.blocks.checkCollision())
       //   this.gameOver();
 
